@@ -1,10 +1,8 @@
 import { EventEmitter } from "node:events";
-import xtermHeadless, { type Terminal as HeadlessTerminal } from "@xterm/headless";
-import serializeAddon from "@xterm/addon-serialize";
+import { Terminal, type Terminal as HeadlessTerminal } from "@xterm/headless";
+import { SerializeAddon } from "@xterm/addon-serialize";
 import { genericDetect, type AgentState, type KindDef } from "./kinds.ts";
-
-const { Terminal } = xtermHeadless;
-const { SerializeAddon } = serializeAddon;
+import { DEFAULT_SHELL } from "./paths.ts";
 
 const DETECT_INTERVAL_MS = 400;
 /** A new classification must hold this long before it becomes the state. */
@@ -57,7 +55,7 @@ export class PtySession extends EventEmitter<SessionEvents> {
     this.kind = opts.kind;
     this.term = new Terminal({ cols: opts.cols, rows: opts.rows, scrollback: 5000, allowProposedApi: true });
     this.term.loadAddon(this.serializer);
-    const shell = process.env.SHELL ?? "/bin/zsh";
+    const shell = DEFAULT_SHELL;
     const command = `exec ${opts.argv.map((a) => `'${a.replaceAll("'", `'\\''`)}'`).join(" ")}`;
     this.proc = Bun.spawn([shell, "-lc", command], {
       cwd: opts.cwd,

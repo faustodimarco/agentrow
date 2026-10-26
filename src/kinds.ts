@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { claudeTranscriptPath } from "./claude.ts";
+import { DEFAULT_SHELL } from "./paths.ts";
 
 export type AgentState = "starting" | "working" | "blocked" | "idle" | "exited";
 
@@ -112,7 +113,7 @@ export const KINDS: Record<string, KindDef> = {
   omp: simple("omp", "omp"),
   shell: {
     label: "Shell",
-    launch: ({ args }) => ({ argv: args.length ? args : [process.env.SHELL ?? "/bin/zsh", "-l"] }),
+    launch: ({ args }) => ({ argv: args.length ? args : [DEFAULT_SHELL, "-l"] }),
   },
 };
 

@@ -9,6 +9,7 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "types": ["bun"],
+    "resolveJsonModule": true,
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,

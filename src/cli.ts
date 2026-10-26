@@ -9,15 +9,18 @@ import { TelegramBot } from "./telegram/bot.ts";
 import { TelegramApi } from "./telegram/api.ts";
 import { loadConfig, saveConfig } from "./config.ts";
 import { ensureHome, LOG_PATH, PID_PATH, SOCKET_PATH } from "./paths.ts";
-import { install, isInstalled, PLIST_PATH, uninstall } from "./launchd.ts";
+import { install, isInstalled, SERVICE_NAME, uninstall } from "./service.ts";
 import { KEY_NAMES } from "./keys.ts";
 import { KINDS, type AgentState } from "./kinds.ts";
+import pkg from "../package.json" with { type: "json" };
+
+const VERSION = pkg.version;
 
 const HELP = `agentrow — persistent coding agents, reachable from your terminal and Telegram
 
 Daemon
   agentrow start | stop | status     start/stop the background daemon
-  agentrow install | uninstall       run the daemon via launchd (starts at login, restarts on crash)
+  agentrow install | uninstall       run the daemon as a launchd/systemd service (starts at login, restarts on crash)
   agentrow daemon                    run the daemon in the foreground
   agentrow logs [-f]                 show the daemon log
 
@@ -176,12 +179,14 @@ async function main(argv: string[]): Promise<void> {
       force: { type: "boolean" },
       follow: { type: "boolean", short: "f" },
       help: { type: "boolean", short: "h" },
+      version: { type: "boolean", short: "v" },
     },
   });
   const [cmd, ...rest] = positionals;
   const timeout = flags.timeout ? Number(flags.timeout) : undefined;
   const need = (v: string | undefined, usage: string): string => v ?? fail(`usage: agentrow ${usage}`);
 
+  if (flags.version) return console.log(VERSION);
   if (!cmd || flags.help || cmd === "help") return console.log(HELP);
 
   switch (cmd) {
@@ -195,20 +200,23 @@ async function main(argv: string[]): Promise<void> {
       await call("daemon.stop");
       return console.log("daemon stopped");
     case "status": {
-      if (!(await isDaemonRunning())) return console.log(`daemon: not running${isInstalled() ? " (launchd job installed)" : ""}`);
+      if (!(await isDaemonRunning())) return console.log(`daemon: not running${isInstalled() ? ` (${SERVICE_NAME} service installed)` : ""}`);
       const { pid } = await call<{ pid: number }>("ping");
       const agents = await call<AgentInfo[]>("agent.list");
-      console.log(`daemon: running (pid ${pid})${isInstalled() ? " via launchd" : ""}`);
+      console.log(`daemon: running (pid ${pid})${isInstalled() ? ` via ${SERVICE_NAME}` : ""}`);
       return printAgents(agents);
     }
-    case "install":
+    case "install": {
       if (await isDaemonRunning()) await call("daemon.stop"), await Bun.sleep(800);
-      install();
+      const file = install();
       await ensureDaemon();
-      return console.log(`installed ${PLIST_PATH}; daemon starts at login and restarts on crash`);
+      return console.log(`installed ${file}; daemon starts at login and restarts on crash`);
+    }
     case "uninstall":
       uninstall();
-      return console.log("launchd job removed (daemon stopped)");
+      return console.log(`${SERVICE_NAME} service removed (daemon stopped)`);
+    case "version":
+      return console.log(VERSION);
     case "logs": {
       const proc = Bun.spawn(["tail", ...(flags.follow ? ["-f"] : []), "-n", "100", LOG_PATH], { stdout: "inherit", stderr: "inherit" });
       await proc.exited;

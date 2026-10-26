@@ -5,7 +5,7 @@ Persistent coding agents you can drive from your terminal **and from Telegram**.
 A background daemon owns real terminals (PTYs) for your agents — Claude Code, Codex, Gemini, opencode, plain shells… — grouped into **workspaces** (folders). Close the terminal, the agents keep working. Each agent gets its own **Telegram forum topic**: write there to prompt it, get a message when it finishes or needs approval, answer dialogs with buttons.
 
 ```
-agentrow daemon (launchd)
+agentrow daemon (launchd / systemd)
 ├── workspace api      ~/code/api
 │   ├── api/claude     🟡 working
 │   └── api/review     🟢 idle
@@ -15,15 +15,39 @@ agentrow daemon (launchd)
 
 ## Install
 
-Requires [Bun](https://bun.sh) ≥ 1.3.5 (native PTY support) and macOS for the launchd service.
+The repository is private, so downloads use your GitHub login (`gh auth login`) or `$GITHUB_TOKEN`.
+
+**macOS / Linux**
 
 ```sh
-bun install
-bun link            # puts `agentrow` on your PATH
-agentrow install    # launchd LaunchAgent: starts at login, restarts on crash
+curl -fsSL -H "Authorization: Bearer $(gh auth token)" https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.sh | sh
+```
+
+**Windows** (PowerShell; runs agentrow inside WSL)
+
+```powershell
+irm -Headers @{Authorization="Bearer $(gh auth token)"} https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.ps1 | iex
+```
+
+The Unix installer puts a single binary at `~/.local/bin/agentrow` (override with `AGENTROW_INSTALL_DIR`, pin a release with `AGENTROW_VERSION=v0.1.0`) and verifies its SHA-256. Builds: macOS arm64/x64, Linux x64/arm64. Binaries are also on the [releases page](https://github.com/faustodimarco/agentrow/releases).
+
+On Windows, agentrow needs a Unix PTY, so the installer sets it up inside WSL (run `wsl --install` first if you don't have it), adds an `agentrow` command to Windows that forwards to WSL, and registers an `agentrow` logon task that starts the daemon and keeps WSL running. Install your agent CLIs (Claude Code, Codex…) inside WSL too.
+
+Then keep the daemon running across logins and crashes:
+
+```sh
+agentrow install    # macOS: launchd LaunchAgent · Linux/WSL: systemd user service
 ```
 
 Without `install`, any command starts the daemon detached from your terminal.
+
+### From source
+
+Requires [Bun](https://bun.sh) ≥ 1.3.5 (native PTY support): `bun install && bun link`.
+
+### Releasing
+
+Bump `version` in `package.json`, commit, then `scripts/release.sh`: it cross-compiles every target, writes `SHA256SUMS`, pushes, and publishes the GitHub release.
 
 ## Terminal
 

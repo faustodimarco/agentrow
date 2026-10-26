@@ -20,6 +20,8 @@ export function expandHome(p: string): string {
   return p;
 }
 
+export const DEFAULT_SHELL = process.env.SHELL ?? (process.platform === "darwin" ? "/bin/zsh" : "/bin/bash");
+
 /** Command line that runs the daemon in the foreground (works for `bun src/cli.ts` and compiled binaries). */
 export function daemonArgv(): string[] {
   return Bun.main.endsWith(".ts") ? [process.execPath, Bun.main, "daemon"] : [process.execPath, "daemon"];

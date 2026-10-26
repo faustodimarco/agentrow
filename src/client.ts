@@ -2,7 +2,7 @@ import net from "node:net";
 import { spawn } from "node:child_process";
 import { openSync } from "node:fs";
 import { daemonArgv, ensureHome, LOG_PATH, SOCKET_PATH } from "./paths.ts";
-import { isInstalled, kickstart } from "./launchd.ts";
+import { isInstalled, startService } from "./service.ts";
 import type { RpcRequest } from "./server.ts";
 
 export class RpcError extends Error {}
@@ -54,14 +54,14 @@ export async function isDaemonRunning(): Promise<boolean> {
 }
 
 /**
- * Start the daemon if it is not running: through launchd when installed (so it
- * stays supervised), otherwise as a detached process that outlives this terminal.
+ * Start the daemon if it is not running: through launchd/systemd when installed
+ * (so it stays supervised), otherwise as a detached process that outlives this terminal.
  */
 export async function ensureDaemon(): Promise<void> {
   if (await isDaemonRunning()) return;
   ensureHome();
   if (isInstalled()) {
-    kickstart();
+    startService();
   } else {
     const log = openSync(LOG_PATH, "a");
     const [cmd, ...args] = daemonArgv();

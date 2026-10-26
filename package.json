@@ -1,0 +1,20 @@
+{
+  "name": "agentrow",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "agentrow": "src/cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "build": "bun build src/cli.ts --compile --outfile dist/agentrow"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@xterm/addon-serialize": "^0.14.0",
+    "@xterm/headless": "^6.0.0"
+  }
+}

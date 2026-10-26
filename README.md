@@ -15,18 +15,16 @@ agentrow daemon (launchd / systemd)
 
 ## Install
 
-The repository is private, so downloads use your GitHub login (`gh auth login`) or `$GITHUB_TOKEN`.
-
 **macOS / Linux**
 
 ```sh
-curl -fsSL -H "Authorization: Bearer $(gh auth token)" https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.sh | sh
 ```
 
 **Windows** (PowerShell; runs agentrow inside WSL)
 
 ```powershell
-irm -Headers @{Authorization="Bearer $(gh auth token)"} https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.ps1 | iex
 ```
 
 The Unix installer puts a single binary at `~/.local/bin/agentrow` (override with `AGENTROW_INSTALL_DIR`, pin a release with `AGENTROW_VERSION=v0.1.0`) and verifies its SHA-256. Builds: macOS arm64/x64, Linux x64/arm64. Binaries are also on the [releases page](https://github.com/faustodimarco/agentrow/releases).

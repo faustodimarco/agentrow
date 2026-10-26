@@ -1,8 +1,7 @@
 # agentrow installer for Windows. agentrow needs a Unix PTY, so it runs inside WSL;
 # this script installs the Linux build there and adds an `agentrow` command to Windows.
 #   irm https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.ps1 | iex
-# Private repo: irm -Headers @{Authorization="Bearer $(gh auth token)"} <url> | iex
-# Downloads use $env:GITHUB_TOKEN, or `gh auth token` when the GitHub CLI is installed.
+# Optional: $env:GITHUB_TOKEN or `gh auth token` is used when present (higher API rate limit).
 
 function Install-Agentrow {
   $ErrorActionPreference = "Stop"

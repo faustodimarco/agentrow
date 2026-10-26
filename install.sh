@@ -1,8 +1,7 @@
 #!/bin/sh
 # agentrow installer for macOS and Linux (and WSL).
 #   curl -fsSL https://raw.githubusercontent.com/faustodimarco/agentrow/main/install.sh | sh
-# Private repo: add  -H "Authorization: Bearer $(gh auth token)"  to curl; the
-# script itself uses $GITHUB_TOKEN, $GH_TOKEN or `gh auth token` for downloads.
+# Optional: $GITHUB_TOKEN / $GH_TOKEN / `gh auth token` is used when present (higher API rate limit).
 # Options (env): AGENTROW_VERSION=v0.1.0  AGENTROW_INSTALL_DIR=~/.local/bin  AGENTROW_REPO=owner/repo
 set -eu
 
